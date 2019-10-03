@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Liste Evènement</title>
+
+    <style>
+    
+    </style>
+
+</head>
+<body>
+
+<!-- v-cloak hides any un-compiled data bindings until the Vue instance is ready. -->
+
+<form id="main" v-cloak>
+
+    <h1 style="text-align: center;">Evènements Nantes</h1> 
+    <input type="text" v-model="searchString" placeholder="Saisir un titre" />
+	<ul>
+        <div class="row">
+            <div class="card col-lg-4" v-for="commit in filteredArticles">
+                    <img :src="commit.fields.media_1" class="card-img-top">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ commit.fields.nom }}</h5>
+                            <h6 class="card-text">{{ commit.fields.ville }} - {{ commit.fields.adresse }}</h6>
+                            <p class="card-text" style="overflow: auto">{{ commit.fields.description }}</p>  
+                                <a :href="commit.fields.lieu_siteweb" class="btn btn-primary">{{ commit.fields.lieu_siteweb }}</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+	</ul>
+
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+
+var apiURL = "https://data.nantesmetropole.fr/api/records/1.0/search/?dataset=244400404_agenda-evenements-nantes-nantes-metropole&facet=lieu&facet=ville&facet=description";
+
+
+var demo = new Vue({
+    el: '#main',
+
+    data:{
+        searchString: "",
+        commits : null
+    },
+
+    created: function () {
+	    this.fetchData()
+    },
+
+    methods: {
+        fetchData: function () {
+            var self = this
+            axios.get(apiURL).then(response => {
+                self.commits = response.data.records
+            })	
+        },
+    },
+    computed: {
+        // A computed property that holds only those articles that match the searchString.
+        filteredArticles: function () {
+            var articles_array = this.commits,
+                searchString = this.searchString;
+            if(!searchString){
+                return articles_array;
+            }
+
+            searchString = searchString.trim().toLowerCase();
+
+            articles_array = articles_array.filter(function(item){
+                if(item.fields.nom.toLowerCase().indexOf(searchString) !== -1){
+                    return item
+                }
+            })
+
+            // Return an array with the filtered data.
+            return articles_array
+        }
+    }
+});
+	
+</script>
+</body>
+</html>
